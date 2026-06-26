@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Live Score Display - Volleyball Live Scorer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .viewers-container {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin: 2rem 0;
+    }
+    
+    .viewers-score {
+        font-size: 6rem;
+        font-weight: bold;
+        text-align: center;
+        margin: 1rem 0;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .viewers-team-name {
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    
+    .team-section {
+        padding: 2rem;
+        border-radius: 8px;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .team-a-section {
+        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        border-left: 8px solid #3b82f6;
+    }
+    
+    .team-a-section.winner {
+        background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+        border-left: 8px solid #22c55e;
+    }
+    
+    .team-a-section.loser {
+        opacity: 0.6;
+    }
+    
+    .team-b-section {
+        background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+        border-left: 8px solid #f59e0b;
+    }
+    
+    .team-b-section.winner {
+        background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+        border-left: 8px solid #22c55e;
+    }
+    
+    .team-b-section.loser {
+        opacity: 0.6;
+    }
+    
+    .set-display {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+    
+    .vs-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #94a3b8;
+        min-height: 300px;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+    }
+    
+    .match-info {
+        background: #0f172a;
+        color: #cbd5e1;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        text-align: center;
+        border-top: 2px solid #475569;
+    }
+    
+    .match-info-title {
+        font-size: 0.875rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .match-info-value {
+        font-size: 1.5rem;
+        color: #f1f5f9;
+        font-weight: bold;
+    }
+.card.mb-4 h2 {
+    color: #f59e0b;
+    text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+    animation: pulse-text 2s infinite;
+}
+
+@keyframes pulse-text {
+    0%, 100% { text-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+    50% { text-shadow: 0 0 35px rgba(52, 211, 153, 1); }
+}
+
+.live-subtitle {
+    color: #6b7280;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    animation: blink-subtitle 1.5s steps(4) infinite;
+}
+
+@keyframes blink-subtitle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+<h2 style="color: #10b981; text-shadow: 0 0 20px rgba(16, 185, 129, 0.8); animation: pulse-text 2s infinite; font-family: 'Courier New', monospace; letter-spacing: 0.15em; text-transform: uppercase;">Live Score Display</h2>
+<p class="live-subtitle">Real-time scores for the audience - Auto-refreshes every 3 seconds</p>
+</div>
+
+<!-- Live Match Option -->
+<div class="card mb-6 p-4 bg-slate-800 rounded-lg border-l-4 border-l-red-500">
+    <label for="viewer_match_selector" style="color: white; font-weight: bold;">Select Match to View:</label>
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <select id="viewer_match_selector" onchange="loadViewerMatch()" style="width: 100%; max-width: 400px; padding: 8px; margin-top: 8px; border-radius: 4px;">
+            <option value="">-- Select Match --</option>
+            <option value="live">🔥 Current Live Match</option>
+        </select>
+        <button type="button" onclick="loadLiveMatch()" class="btn btn-primary px-4 py-2 text-xs font-bold uppercase rounded bg-red-600 text-white" style="margin-top: 8px;">Load Live</button>
+    </div>
+</div>
+
+<!-- Live Score Display -->
+<div id="viewer-scoreboard" style="display: none;">
+    <div class="viewers-container">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Team A -->
+            <div class="team-section team-a-section">
+                <div class="viewers-team-name" id="viewer-team-a-name">Team A</div>
+                <div class="viewers-score" id="viewer-team-a-score">0</div>
+                <div class="set-display">
+                    Current Set: <span id="viewer-current-set">1</span>
+                </div>
+            </div>
+            
+            <!-- VS Divider -->
+            <div class="vs-divider">VS</div>
+            
+            <!-- Team B -->
+            <div class="team-section team-b-section">
+                <div class="viewers-team-name" id="viewer-team-b-name">Team B</div>
+                <div class="viewers-score" id="viewer-team-b-score">0</div>
+                <div class="set-display">
+                    Sets Won: <span id="viewer-team-b-sets">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Match Information -->
+    <div class="match-info">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <div class="match-info-title">Tournament</div>
+                <div class="match-info-value" id="viewer-tournament">--</div>
+            </div>
+            <div>
+                <div class="match-info-title">Points to Win</div>
+                <div class="match-info-value" id="viewer-points-to-win">25</div>
+            </div>
+            <div>
+                <div class="match-info-title">Status</div>
+                <div class="match-info-value" id="viewer-match-status">Ongoing</div>
+            </div>
+            <div>
+                <div class="match-info-title">Last Update</div>
+                <div class="match-info-value" id="viewer-last-update">Now</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let allMatches = [];
+let currentViewerMatch = null;
+let refreshInterval = null;
+
+document.addEventListener("DOMContentLoaded", function() {
+    loadAllMatches();
+    refreshInterval = setInterval(refreshViewerScore, 3000);
+});
+
+function loadAllMatches() {
+    fetch('/api/public/tournaments')
+        .then(response => response.json())
+        .then(tournaments => {
+            let selector = document.getElementById('viewer_match_selector');
+            let currentValue = selector.value;
+            selector.innerHTML = '<option value="">-- Select Match --</option><option value="live">🔥 Current Live Match</option>';
+            
+            const promises = tournaments.map(t => 
+                fetch(`/api/public/tournament/${t.id}/matches`)
+                    .then(r => r.json())
+                    .then(matches => ({tournament: t, matches: matches}))
+                    .catch(e => ({tournament: t, matches: []}))
+            );
+            
+            return Promise.all(promises);
+        })
+        .then(results => {
+            let selector = document.getElementById('viewer_match_selector');
+            results.forEach(result => {
+                result.matches.forEach(match => {
+                    const option = document.createElement('option');
+                    option.value = match.id;
+                    option.textContent = `${match.team_a_name} vs ${match.team_b_name} (${result.tournament.name})`;
+                    selector.appendChild(option);
+                    allMatches.push({...match, tournament: result.tournament});
+                });
+            });
+        })
+        .catch(error => console.error('Error loading matches:', error));
+}
+
+function loadViewerMatch() {
+    const matchId = document.getElementById('viewer_match_selector').value;
+    if (!matchId) {
+        document.getElementById('viewer-scoreboard').style.display = 'none';
+        if (refreshInterval) clearInterval(refreshInterval);
+        return;
+    }
+    
+    if (matchId === 'live') {
+        loadLiveMatch();
+        return;
+    }
+    
+    currentViewerMatch = allMatches.find(m => m.id == matchId);
+    if (currentViewerMatch) {
+        document.getElementById('viewer-scoreboard').style.display = 'block';
+        document.getElementById('viewer-team-a-name').textContent = currentViewerMatch.team_a_name;
+        document.getElementById('viewer-team-b-name').textContent = currentViewerMatch.team_b_name;
+        document.getElementById('viewer-tournament').textContent = currentViewerMatch.tournament.name;
+        document.getElementById('viewer-points-to-win').textContent = currentViewerMatch.points_to_win;
+        
+        // Immediately fetch current scores
+        fetch('/api/score-updates')
+            .then(response => response.json())
+            .then(data => {
+                if (data.updates && data.updates[matchId]) {
+                    const matchUpdate = data.updates[matchId];
+                    document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
+                    document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
+                    document.getElementById('viewer-current-set').textContent = matchUpdate.current_set || 1;
+                    document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+                }
+            })
+            .catch(error => console.error('Error fetching score updates:', error));
+        
+        // Start refresh interval if not running
+        if (!refreshInterval) {
+            refreshInterval = setInterval(refreshViewerScore, 3000);
+        }
+    }
+}
+
+function loadLiveMatch() {
+    fetch('/api/current-live-match')
+        .then(response => response.json())
+        .then(data => {
+            if (data.match) {
+                currentViewerMatch = {
+                    id: data.match.id,
+                    team_a_name: data.match.team_a_name,
+                    team_b_name: data.match.team_b_name,
+                    tournament: { name: data.match.tournament_name },
+                    points_to_win: 25
+                };
+                document.getElementById('viewer-scoreboard').style.display = 'block';
+                document.getElementById('viewer-team-a-name').textContent = currentViewerMatch.team_a_name;
+                document.getElementById('viewer-team-b-name').textContent = currentViewerMatch.team_b_name;
+                document.getElementById('viewer-tournament').textContent = currentViewerMatch.tournament.name;
+                document.getElementById('viewer-points-to-win').textContent = currentViewerMatch.points_to_win;
+                
+                fetch('/api/score-updates')
+                    .then(response => response.json())
+                    .then(scoreData => {
+                        if (scoreData.updates && scoreData.updates[currentViewerMatch.id]) {
+                            const matchUpdate = scoreData.updates[currentViewerMatch.id];
+                            document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
+                            document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
+                            document.getElementById('viewer-current-set').textContent = matchUpdate.current_set || 1;
+                            document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching score updates:', error));
+                
+                if (!refreshInterval) {
+                    refreshInterval = setInterval(refreshViewerScore, 3000);
+                }
+            } else {
+                showAlert('No live match currently active', 'info');
+                document.getElementById('viewer-scoreboard').style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Error fetching live match:', error));
+}
+
+function refreshViewerScore() {
+    if (!currentViewerMatch) return;
+    
+    // Update timestamp
+    const now = new Date();
+    document.getElementById('viewer-last-update').textContent = now.toLocaleTimeString();
+    
+    // Fetch latest scores from the server
+    fetch('/api/score-updates')
+        .then(response => response.json())
+        .then(data => {
+            if (data.updates && data.updates[currentViewerMatch.id]) {
+                const matchUpdate = data.updates[currentViewerMatch.id];
+                document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
+                document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
+                document.getElementById('viewer-current-set').textContent = matchUpdate.current_set || 1;
+                document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+                
+                // Show winner/loser if match is completed
+                const teamASection = document.querySelector('.team-a-section');
+                const teamBSection = document.querySelector('.team-b-section');
+                
+                if (matchUpdate.status === 'completed' && matchUpdate.winner_team_id) {
+                    if (matchUpdate.winner_team_id == currentViewerMatch.team_a_id) {
+                        teamASection.classList.add('winner');
+                        teamBSection.classList.add('loser');
+                    } else if (matchUpdate.winner_team_id == currentViewerMatch.team_b_id) {
+                        teamBSection.classList.add('winner');
+                        teamASection.classList.add('loser');
+                    }
+                } else {
+                    teamASection.classList.remove('winner', 'loser');
+                    teamBSection.classList.remove('winner', 'loser');
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching score updates:', error));
+}
+
+// Also load matches periodically
+setInterval(loadAllMatches, 10000);
+</script>
+{% endblock %}

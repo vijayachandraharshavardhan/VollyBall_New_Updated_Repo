@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}About - Volleyball Live Scorer{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Sports Championship Jumbotron */
+    .about-hero {
+        background: linear-gradient(180deg, #101726 0%, #0b0f17 100%);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        border-top: 3px solid #3b82f6;
+    }
+
+    /* Tactically structured workflow and cards */
+    .stadium-card {
+        background-color: #0f1422;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stadium-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-5xl mx-auto space-y-12 my-4">
+    
+    <!-- 1. HEADER SECTION -->
+    <div class="about-hero rounded-xl p-8 text-center shadow-2xl">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase mb-3 animate__animated animate__slideInDown">
+            About Volleyball Live Scorer
+        </h1>
+        <div class="w-16 h-1 bg-blue-500 mx-auto mb-4 rounded"></div>
+        <p class="text-sm sm:text-base text-slate-300 font-medium max-w-2xl mx-auto uppercase tracking-wide animate__animated animate__fadeIn animate__delay-1s">
+            Your complete solution for managing volleyball tournaments with real-time live scoring
+        </p>
+    </div>
+
+    <!-- 2. MAIN DESCRIPTION -->
+    <div class="bg-[#0f1422] border border-slate-900 rounded-xl p-6 sm:p-8 space-y-4 shadow-lg animate__animated animate__fadeIn">
+        <h2 class="text-xl font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
+            <span>📢</span> What is Volleyball Live Scorer?
+        </h2>
+        <div class="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-medium">
+            <p>
+                This application provides a complete solution for managing volleyball tournaments with real-time live scoring capabilities. Whether you're organizing a small local tournament or a large-scale championship event, Volleyball Live Scorer makes it easy to track scores, manage teams, and provide a beautiful display for your audience.
+            </p>
+            <p>
+                With our intuitive admin dashboard and real-time viewer display, you can focus on the game while we handle the scoring calculations and audience streaming layout seamlessly.
+            </p>
+        </div>
+    </div>
+
+    <!-- 3. GET STARTED WORKFLOW -->
+    <div class="space-y-6">
+        <h2 class="text-center text-xl sm:text-2xl font-black text-white uppercase tracking-widest">
+            Get Started in <span class="text-blue-500">3 Simple Steps</span>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+            <!-- Step 1 -->
+            <div class="stadium-card rounded-xl p-6 flex flex-col justify-between relative border-t-4 border-t-amber-500 shadow-md">
+                <div class="absolute -top-5 left-6 bg-amber-500 text-slate-950 text-lg font-black w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                    1
+                </div>
+                <div class="space-y-2 mt-4 mb-6">
+                    <h4 class="font-black text-base text-white uppercase tracking-wider">Admin Login</h4>
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                        Login to your admin account or create a new one to access the tournament management dashboard. Secure access to manage all your tournaments and matches.
+                    </p>
+                </div>
+                <a href="{{ url_for('login') }}" class="w-full text-center px-4 py-2.5 rounded bg-[#161f32] border border-amber-500/30 text-amber-400 font-black text-xs uppercase tracking-wider hover:bg-amber-500 hover:text-slate-950 transition-all duration-150 block">
+                    Login Now
+                </a>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="stadium-card rounded-xl p-6 flex flex-col justify-between relative border-t-4 border-t-blue-500 shadow-md">
+                <div class="absolute -top-5 left-6 bg-blue-500 text-white text-lg font-black w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                    2
+                </div>
+                <div class="space-y-2 mt-4 mb-6">
+                    <h4 class="font-black text-base text-white uppercase tracking-wider">Create Tournament</h4>
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                        After logging in, create a new tournament with date, location, and tournament details. Set up your tournament structure and prepare for your event.
+                    </p>
+                </div>
+                <a href="{{ url_for('create_tournament') }}" class="w-full text-center px-4 py-2.5 rounded bg-[#161f32] border border-blue-500/30 text-blue-400 font-black text-xs uppercase tracking-wider hover:bg-blue-500 hover:text-white transition-all duration-150 block">
+                    Create Tournament
+                </a>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="stadium-card rounded-xl p-6 flex flex-col justify-between relative border-t-4 border-t-emerald-500 shadow-md">
+                <div class="absolute -top-5 left-6 bg-emerald-500 text-slate-950 text-lg font-black w-10 h-10 rounded-full flex items-center justify-center shadow-lg">
+                    3
+                </div>
+                <div class="space-y-2 mt-4 mb-6">
+                    <h4 class="font-black text-base text-white uppercase tracking-wider">Add Teams & Scoring</h4>
+                    <p class="text-xs sm:text-sm text-slate-400 font-medium leading-relaxed">
+                        Create teams, set up matches, and start live scoring with real-time audience display. Manage all game details from your admin dashboard.
+                    </p>
+                </div>
+                <a href="{{ url_for('create_team') }}" class="w-full text-center px-4 py-2.5 rounded bg-[#161f32] border border-emerald-500/30 text-emerald-400 font-black text-xs uppercase tracking-wider hover:bg-emerald-500 hover:text-slate-950 transition-all duration-150 block">
+                    Create Teams
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. FEATURES GRID SECTION -->
+    <div class="bg-[#0b0f17]/60 border border-slate-900 rounded-xl p-6 sm:p-8 space-y-6">
+        <h2 class="text-center text-xl font-black text-white uppercase tracking-widest">
+            Key System Features
+        </h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Feature 1 -->
+            <div class="bg-[#0f1422] p-5 rounded border border-slate-800/60 border-t-2 border-t-blue-500 space-y-2 shadow-sm">
+                <div class="text-2xl">⚡</div>
+                <h4 class="font-black text-sm text-white uppercase tracking-wide">Real-time Score Updates</h4>
+                <p class="text-xs text-slate-400 font-medium leading-relaxed">See scores update instantly across all displays without any latency delays or manually refreshing.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-[#0f1422] p-5 rounded border border-slate-800/60 border-t-2 border-t-blue-500 space-y-2 shadow-sm">
+                <div class="text-2xl">📺</div>
+                <h4 class="font-black text-sm text-white uppercase tracking-wide">Live Audience Display</h4>
+                <p class="text-xs text-slate-400 font-medium leading-relaxed">Beautiful, high-contrast responsive viewer scoreboard layouts optimized to sit perfectly on any panel size.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-[#0f1422] p-5 rounded border border-slate-800/60 border-t-2 border-t-blue-500 space-y-2 shadow-sm">
+                <div class="text-2xl">🏆</div>
+                <h4 class="font-black text-sm text-white uppercase tracking-wide">Tournament Setup</h4>
+                <p class="text-xs text-slate-400 font-medium leading-relaxed">Complete configuration control systems running an interactive and simple match setup schema.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-[#0f1422] p-5 rounded border border-slate-800/60 border-t-2 border-t-blue-500 space-y-2 shadow-sm">
+                <div class="text-2xl">👥</div>
+                <h4 class="font-black text-sm text-white uppercase tracking-wide">Team & Match Tracking</h4>
+                <p class="text-xs text-slate-400 font-medium leading-relaxed">Organize club registrations, align match brackets, and archive points in one single database repository.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="bg-[#0f1422] p-5 rounded border border-slate-800/60 border-t-2 border-t-blue-500 space-y-2 shadow-sm">
+                <div class="text-2xl">🎮</div>
+                <h4 class="font-black text-sm text-white uppercase tracking-wide">Admin Dashboard</h4>
+                <p class="text-xs text-slate-400 font-medium leading-relaxed">Powerful court manager boards with hotkey point controllers and robust match execution modules.</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="bg-[#0f1422] p-5 rounded border border-slate-800/60 border-t-2 border-t-blue-500 space-y-2 shadow-sm">
+                <div class="text-2xl">📱</div>
+                <h4 class="font-black text-sm text-white uppercase tracking-wide">Responsive Engineering</h4>
+                <p class="text-xs text-slate-400 font-medium leading-relaxed">Built from the ground up to ensure fluid, layout-perfect responses across laptops, tablets, and phones.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

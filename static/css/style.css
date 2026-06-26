@@ -1,0 +1,433 @@
+/* Volleyball Live Scorer - Custom Styles & Animations */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #1e3a8a;
+    --secondary-color: #f59e0b;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --dark-color: #1f2937;
+    --light-color: #f9fafb;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: white;
+    padding: 2rem 2rem 1.5rem 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-bottom: 3px solid var(--secondary-color);
+}
+
+header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+header p {
+    font-size: 0.95rem;
+    opacity: 0.95;
+    font-weight: 300;
+    letter-spacing: 0.3px;
+}
+
+/* Navigation */
+nav {
+    background: linear-gradient(to right, #0f172a 0%, #1e293b 100%);
+    padding: 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+nav li {
+    flex: 0 0 auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+nav li:last-child {
+    border-right: none;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 1rem 1.5rem;
+    display: block;
+    transition: var(--transition);
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: var(--secondary-color);
+    transition: width 0.3s ease;
+}
+
+nav a:hover {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--secondary-color);
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Main Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    color: #111827;
+    background-color: #ffffff;
+    caret-color: #111827;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="date"]::placeholder,
+input[type="time"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder {
+    color: #6b7280;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    color: #111827;
+    background-color: #ffffff;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1e3a8a;
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #d97706;
+    opacity: 0.9;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* Score Display */
+.score-display {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    color: white;
+    border-radius: var(--border-radius);
+    animation: scoreFlip 0.6s ease-in-out;
+}
+
+@keyframes scoreFlip {
+    0% {
+        transform: rotateX(0deg);
+    }
+    50% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+.team-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+/* Court Layout */
+.court-container {
+    background: linear-gradient(to bottom, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%);
+    border: 3px solid var(--dark-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin: 2rem 0;
+    min-height: 400px;
+    position: relative;
+}
+
+.court-line {
+    border: 2px solid var(--dark-color);
+    margin: 1rem 0;
+    padding: 1rem;
+}
+
+.court-transition {
+    animation: courtSlide 0.5s ease-in-out;
+}
+
+@keyframes courtSlide {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Score Grid */
+.score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+@media (max-width: 768px) {
+    .score-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.team-card {
+    background: white;
+    border-left: 4px solid var(--primary-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-card.team-a {
+    border-left-color: #3b82f6;
+}
+
+.team-card.team-b {
+    border-left-color: #ef4444;
+}
+
+/* Set Scores */
+.set-scores {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.set-score {
+    background: var(--light-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    text-align: center;
+    flex: 1;
+}
+
+/* Control Buttons */
+.controls {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.controls button {
+    flex: 1;
+    min-width: 120px;
+}
+
+/* Footer */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-top: 4rem;
+}
+
+footer p {
+    margin-bottom: 0.5rem;
+}
+
+footer a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-left: 4px solid var(--warning-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header {
+        padding: 1rem;
+    }
+
+    nav ul {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .score-display {
+        font-size: 2.5rem;
+    }
+}

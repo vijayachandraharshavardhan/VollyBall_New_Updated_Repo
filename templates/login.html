@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - Volleyball Live Scorer{% endblock %}
+
+{% block extra_css %}
+<style>
+.login-panel {
+    max-width: 520px;
+    margin: 0 auto;
+    background: rgba(15, 21, 34, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.login-panel .hero-header {
+    background: linear-gradient(135deg, rgba(59,130,246,0.95), rgba(245,158,11,0.95));
+    padding: 2rem 1.5rem;
+    color: white;
+}
+
+.login-panel .hero-header h2 {
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+    letter-spacing: 0.02em;
+}
+
+.login-panel .hero-header p {
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+.login-panel .form-body {
+    padding: 2rem;
+}
+
+.login-panel .form-group label {
+    display: block;
+    margin-bottom: 0.55rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.login-panel .form-group input[type="text"],
+.login-panel .form-group input[type="password"] {
+    width: 100%;
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(15, 23, 42, 0.98);
+    color: #f8fafc !important;
+    caret-color: #f8fafc !important;
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.login-panel .form-group input::placeholder {
+    color: rgba(241, 245, 249, 0.75) !important;
+}
+
+.login-panel .form-group input:-webkit-autofill,
+.login-panel .form-group input:-webkit-autofill:hover,
+.login-panel .form-group input:-webkit-autofill:focus,
+.login-panel .form-group input:-webkit-autofill:active {
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #f8fafc !important;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.98) inset;
+}
+
+.login-panel .form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0 1.5rem;
+    flex-wrap: wrap;
+}
+
+.login-panel .form-row label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.login-panel .form-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #f59e0b;
+}
+
+.login-panel .login-actions {
+    display: grid;
+    gap: 1rem;
+}
+
+.login-panel .login-actions .btn-primary {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 14px;
+}
+
+.login-panel .register-link {
+    text-align: center;
+    margin-top: 1rem;
+    color: #94a3b8;
+}
+
+.login-panel .register-link a {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.login-panel .register-link a:hover {
+    color: #fbbf24;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-panel">
+    <div class="hero-header">
+        <h2>Admin Login</h2>
+        <p>Login to your admin account to manage tournaments and keep live scoring running smoothly.</p>
+    </div>
+
+    <div class="form-body">
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter your username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+
+            <div class="form-row">
+                <label>
+                    <input type="checkbox" name="remember_me">
+                    Remember me
+                </label>
+                <a href="{{ url_for('register') }}" class="text-amber-400 font-semibold hover:text-amber-300">Need an account?</a>
+            </div>
+
+            <div class="login-actions">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </form>
+
+        <p class="register-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Volleyball Live Scorer{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Fullscreen Adaptive Opening Preloader Screen */
+    #spike-preloader {
+        position: fixed;
+        inset: 0;
+        background-color: #06090f;
+        background-image: radial-gradient(circle at 50% 50%, #0f172a 0%, #06090f 100__);
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+        transition: opacity 0.5s ease-out, visibility 0.5s;
+    }
+
+    /* Media aspect-ratio controller frame */
+    .preloader-frame {
+        width: 100%;
+        max-width: 440px;
+        aspect-ratio: 16 / 9;
+        border-radius: 4px;
+        border: 2px solid #3b82f6;
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+        overflow: hidden;
+    }
+
+    /* Immersive Volleyball Art Background Layer */
+    .stadium-arena-bg {
+        position: relative;
+        background-image: url('https://png.pngtree.com/png-vector/20240423/ourmid/pngtree-volleyball-player-serving-a-ball-creative-art-png-image_12310523.png');
+        background-size: contain;
+        background-position: center right;
+        background-repeat: no-repeat;
+    }
+
+    /* Dark overlay matrix tint to protect text readability */
+    .stadium-arena-bg::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, #0b0f17 30%, rgba(11, 15, 23, 0.85) 70%, rgba(11, 15, 23, 0.95) 100%);
+        border-radius: 0.75rem;
+        z-index: 1;
+    }
+
+    .arena-content-layer {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Pure CSS Performance-Optimized Volleyball Loop (Triggers every 3 seconds) */
+    .volleyball-pulse-ball {
+        font-size: 2.5rem;
+        display: inline-block;
+        animation: spikeLoop 3s ease-in-out infinite;
+    }
+
+    @keyframes spikeLoop {
+        0% {
+            transform: translateY(0) scale(1) rotate(0deg);
+            text-shadow: 0 0 0 rgba(245, 158, 11, 0);
+        }
+        30% {
+            transform: translateY(-25px) scale(1.1) rotate(180deg);
+            text-shadow: 0 15px 12px rgba(245, 158, 11, 0.4);
+        }
+        50% {
+            transform: translateY(0) scale(0.95) rotate(360deg);
+        }
+        65% {
+            transform: translateY(-8px) scale(1) rotate(420deg);
+        }
+        80% {
+            transform: translateY(0) scale(1) rotate(450deg);
+        }
+        100% {
+            transform: translateY(0) scale(1) rotate(450deg);
+        }
+    }
+
+    /* Clean Hero Dashboard Engine Transitions */
+    #main-dashboard-content {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #main-dashboard-content.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Interactive Stadium Panel Controls */
+    .interactive-panel {
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .interactive-panel:hover {
+        transform: translateY(-2px);
+        background-color: #131a2c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="spike-preloader">
+    <div class="w-full flex flex-col items-center justify-center space-y-6 max-w-sm mx-auto">
+        <div class="preloader-frame bg-slate-950">
+            <img class="w-full h-full object-cover" src="https://media1.tenor.com/m/rY6qZTnN-X8AAAAC/haikyuu-anime.gif" alt="Haikyuu Match Load">
+        </div>
+        
+        <div class="text-center space-y-1">
+            <div class="flex items-center justify-center gap-2">
+                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span>
+                <p class="text-blue-400 font-mono tracking-[0.2em] text-[10px] uppercase font-black">Syncing Game Dashboard</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="absolute bottom-6 left-4 right-4 text-center">
+        <p class="text-slate-600 font-bold tracking-widest text-[10px] sm:text-xs uppercase">
+            Developed by <span class="text-slate-400 font-black">B.V.CH.HARSHA VARDHAN</span>
+        </p>
+    </div>
+</div>
+
+<div id="main-dashboard-content" class="w-full max-w-4xl mx-auto space-y-8 my-auto px-2">
+    
+    <div class="stadium-arena-bg rounded-xl shadow-2xl overflow-hidden border border-slate-900 border-t-3 border-t-amber-500">
+        <div class="arena-content-layer p-6 sm:p-12 text-center md:text-left md:max-w-2xl space-y-4">
+            
+            <div class="w-full text-center md:text-left h-12">
+                <span class="volleyball-pulse-ball">🏐</span>
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase leading-tight">
+                Welcome To <br class="hidden sm:inline">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-amber-400">Volleyball Live Scorer</span>
+            </h2>
+            
+            <p class="text-xs sm:text-sm text-slate-300 font-bold tracking-wider uppercase max-w-md">
+                Real-time score tracking for volleyball tournaments
+            </p>
+            
+            <div class="w-20 h-1 bg-blue-500 my-4 rounded"></div>
+            
+            <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <div class="bg-[#090d14]/90 border border-slate-800/80 py-2 px-4 rounded-md inline-block">
+                    <p class="text-[10px] text-amber-400 font-black tracking-widest uppercase">Developed by B.V.CH.HARSHA VARDHAN</p>
+                </div>
+                <div class="bg-[#090d14]/60 border border-slate-900 py-2 px-4 rounded-md inline-block">
+                    <p class="text-[9px] text-slate-400 font-mono tracking-wider uppercase">
+
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <h3 class="text-[10px] font-black tracking-[0.25em] text-blue-500 uppercase text-center sm:text-left">Live Arena Navigation Monitor</h3>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ url_for('index') }}" class="interactive-panel bg-[#0f1422] border border-slate-900 p-5 rounded-lg flex flex-col items-center md:items-start justify-center gap-1 shadow-md border-l-2 border-l-blue-500 group">
+                <span class="text-slate-500 group-hover:text-blue-400 text-[10px] font-bold uppercase tracking-wider transition-colors">Home Dashboard</span>
+                <span class="font-mono text-xs font-black text-white tracking-tight uppercase mt-1">View Main →</span>
+            </a>
+            
+            <a href="{{ url_for('admin_scoring') }}" class="interactive-panel bg-[#0f1422] border border-slate-900 p-5 rounded-lg flex flex-col items-center md:items-start justify-center gap-1 shadow-md border-l-2 border-l-amber-500 group">
+                <span class="text-slate-500 group-hover:text-amber-400 text-[10px] font-bold uppercase tracking-wider transition-colors">Live Scoring</span>
+                <span class="font-mono text-xs font-black text-white tracking-tight uppercase mt-1">Track Match →</span>
+            </a>
+            
+            <a href="{{ url_for('viewers') }}" class="interactive-panel bg-[#0f1422] border border-slate-900 p-5 rounded-lg flex flex-col items-center md:items-start justify-center gap-1 shadow-md border-l-2 border-l-emerald-500 group">
+                <span class="text-slate-500 group-hover:text-emerald-400 text-[10px] font-bold uppercase tracking-wider transition-colors">Viewer Display</span>
+                <span class="font-mono text-xs font-black text-white tracking-tight uppercase mt-1">Stream Board →</span>
+            </a>
+            
+            <a href="{{ url_for('about') }}" class="interactive-panel bg-[#0f1422] border border-slate-900 p-5 rounded-lg flex flex-col items-center md:items-start justify-center gap-1 shadow-md border-l-2 border-l-purple-500 group">
+                <span class="text-slate-500 group-hover:text-purple-400 text-[10px] font-bold uppercase tracking-wider transition-colors">About System</span>
+                <span class="font-mono text-xs font-black text-white tracking-tight uppercase mt-1">Read Rules →</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const preloader = document.getElementById("spike-preloader");
+        const dashboard = document.getElementById("main-dashboard-content");
+
+        // High-efficiency delay window to reveal content with hardware-accelerated CSS engine transforms
+        setTimeout(() => {
+            preloader.style.opacity = "0";
+            preloader.style.visibility = "hidden";
+            dashboard.classList.add("visible");
+        }, 3200);
+    });
+</script>
+{% endblock %}

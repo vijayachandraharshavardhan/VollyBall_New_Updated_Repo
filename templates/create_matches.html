@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Create Matches - Volleyball Live Scorer{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Create Matches</h2>
+    <p>Setup matches for your tournament</p>
+
+    <form method="POST" action="{{ url_for('create_matches') }}">
+        <div class="form-group">
+            <label for="tournament_id">Select Tournament:</label>
+            <select id="tournament_id" name="tournament_id" required onchange="updateTeamOptions()">
+                <option value="">-- Select Tournament --</option>
+                {% for tournament in tournaments %}
+                <option value="{{ tournament.id }}">{{ tournament.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <h3>Match Details</h3>
+
+        <div class="score-grid">
+            <div class="form-group">
+                <label for="team_a_id">Team A:</label>
+                <select id="team_a_id" name="team_a_id" required>
+                    <option value="">-- Select Team --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="team_b_id">Team B:</label>
+                <select id="team_b_id" name="team_b_id" required>
+                    <option value="">-- Select Team --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="points_to_win">Points to Win Set:</label>
+            <input type="number" id="points_to_win" name="points_to_win" min="15" max="50" value="25" required placeholder="e.g., 25">
+            <small style="display: block; margin-top: 5px; color: #666;">Standard is 25 points to win a set</small>
+        </div>
+
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Create Match</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function updateTeamOptions() {
+    const tournamentId = document.getElementById('tournament_id').value;
+    const teamASelect = document.getElementById('team_a_id');
+    const teamBSelect = document.getElementById('team_b_id');
+    
+    // Clear existing options
+    teamASelect.innerHTML = '<option value="">-- Select Team --</option>';
+    teamBSelect.innerHTML = '<option value="">-- Select Team --</option>';
+    
+    if (!tournamentId) return;
+    
+    fetch(`/api/tournament/${tournamentId}/teams`)
+        .then(response => response.json())
+        .then(teams => {
+            teams.forEach(team => {
+                const optionA = document.createElement('option');
+                optionA.value = team.id;
+                optionA.textContent = team.name;
+                teamASelect.appendChild(optionA);
+                
+                const optionB = document.createElement('option');
+                optionB.value = team.id;
+                optionB.textContent = team.name;
+                teamBSelect.appendChild(optionB);
+            });
+        })
+        .catch(error => console.error('Error fetching teams:', error));
+}
+</script>
+{% endblock %}

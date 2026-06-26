@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Create Team - Volleyball Live Scorer{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Create New Team</h2>
+    <p>Add a team to the tournament</p>
+
+    <form method="POST" action="{{ url_for('create_team') }}">
+        <div class="form-group">
+            <label for="tournament_id">Select Tournament:</label>
+            <select id="tournament_id" name="tournament_id" required onchange="updateTeamCount()">
+                <option value="">-- Select Tournament --</option>
+                {% for tournament in tournaments %}
+                <option value="{{ tournament.id }}">{{ tournament.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="team_name">Team Name:</label>
+            <input type="text" id="team_name" name="team_name" required placeholder="e.g., Eagles United">
+        </div>
+
+        <div class="score-grid">
+            <div class="form-group">
+                <label for="coach_name">Coach Name:</label>
+                <input type="text" id="coach_name" name="coach_name" placeholder="Coach's name">
+            </div>
+
+            <div class="form-group">
+                <label for="jersey_color">Jersey Color:</label>
+                <input type="text" id="jersey_color" name="jersey_color" placeholder="e.g., Blue">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="players">Number of Players:</label>
+            <input type="number" id="players" name="players" min="1" max="20" value="12" required>
+        </div>
+
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Create Team</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div id="teams-count" class="card mt-6" style="display: none;">
+    <h3>Teams in Selected Tournament</h3>
+    <p id="teams-list">No teams yet</p>
+</div>
+
+<script>
+function updateTeamCount() {
+    const tournamentId = document.getElementById('tournament_id').value;
+    const teamsDiv = document.getElementById('teams-count');
+    const teamsList = document.getElementById('teams-list');
+    
+    if (!tournamentId) {
+        teamsDiv.style.display = 'none';
+        return;
+    }
+    
+    fetch(`/api/tournament/${tournamentId}/teams`)
+        .then(response => response.json())
+        .then(teams => {
+            if (teams.length === 0) {
+                teamsList.textContent = 'No teams in this tournament yet';
+            } else {
+                teamsList.innerHTML = teams.map(team => `<div>• ${team.name}</div>`).join('');
+            }
+            teamsDiv.style.display = 'block';
+        })
+        .catch(error => console.error('Error fetching teams:', error));
+}
+
+// Load teams on page load if tournament is selected
+document.addEventListener('DOMContentLoaded', function() {
+    const selected = document.getElementById('tournament_id').value;
+    if (selected) {
+        updateTeamCount();
+    }
+});
+</script>
+{% endblock %}

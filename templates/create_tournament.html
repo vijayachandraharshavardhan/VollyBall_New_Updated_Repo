@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Create Tournament - Volleyball Live Scorer{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Create New Tournament</h2>
+    <p>Setup a new volleyball tournament</p>
+
+    <form method="POST" action="{{ url_for('create_tournament') }}">
+        <div class="form-group">
+            <label for="tournament_name">Tournament Name:</label>
+            <input type="text" id="tournament_name" name="tournament_name" required placeholder="e.g., City Championship 2024">
+        </div>
+
+        <div class="score-grid">
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" placeholder="Enter tournament details..."></textarea>
+        </div>
+
+        <div class="score-grid">
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" placeholder="e.g., Central Sports Arena">
+            </div>
+
+            <div class="form-group">
+                <label for="organizer">Organizer:</label>
+                <input type="text" id="organizer" name="organizer" placeholder="Your name or organization">
+            </div>
+        </div>
+
+        <div class="controls">
+            <button type="submit" class="btn btn-primary">Create Tournament</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

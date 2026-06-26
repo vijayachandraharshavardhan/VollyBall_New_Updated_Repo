@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Coin Toss - Volleyball Live Scorer{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>⚡ Coin Toss & Side Selection</h2>
+    <p>Determine which team serves first</p>
+
+    <div class="score-grid">
+        <div class="card">
+            <h3 class="team-name">Team A</h3>
+            <div style="font-size: 2rem; text-align: center; margin: 2rem 0;">🏐</div>
+            <button class="btn btn-primary btn-block" onclick="performCoinToss()">Flip Coin</button>
+        </div>
+
+        <div class="card">
+            <h3 class="team-name">Team B</h3>
+            <div style="font-size: 2rem; text-align: center; margin: 2rem 0;">🏐</div>
+            <button class="btn btn-secondary btn-block" onclick="performCoinToss()">Flip Coin</button>
+        </div>
+    </div>
+
+    <div id="toss-result" style="display: none;" class="card" style="margin-top: 2rem;">
+        <h3>Coin Toss Result</h3>
+        <p id="result-text" style="font-size: 1.2rem; margin: 1rem 0;"></p>
+
+        <h4>Select Side Preference:</h4>
+        <div class="score-grid">
+            <button class="btn btn-primary" onclick="selectSide('left')">Left Side</button>
+            <button class="btn btn-primary" onclick="selectSide('right')">Right Side</button>
+        </div>
+
+        <h4 style="margin-top: 2rem;">Select First Serve:</h4>
+        <div class="score-grid">
+            <button class="btn btn-success" onclick="selectServe('team-a')">Team A Serves</button>
+            <button class="btn btn-success" onclick="selectServe('team-b')">Team B Serves</button>
+        </div>
+
+        <button class="btn btn-primary btn-block" style="margin-top: 2rem;" onclick="confirmToss()">Confirm & Continue</button>
+    </div>
+</div>
+
+<script>
+function performCoinToss() {
+    const result = Math.random() > 0.5 ? 'Heads' : 'Tails';
+    const team = result === 'Heads' ? 'Team A' : 'Team B';
+    
+    document.getElementById('result-text').innerHTML = 
+        `<strong>${result}!</strong><br>${team} wins the toss!`;
+    document.getElementById('toss-result').style.display = 'block';
+}
+
+function selectSide(side) {
+    console.log('Selected side:', side);
+}
+
+function selectServe(team) {
+    console.log('Selected serve:', team);
+}
+
+function confirmToss() {
+    alert('Toss confirmed! Ready to start the match.');
+    // Redirect to scoring page
+}
+</script>
+{% endblock %}

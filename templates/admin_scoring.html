@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Scoring Dashboard - Volleyball Live Scorer{% endblock %}
+
+{% block content %}
+<div class="card mb-6 bg-slate-900 border-l-4 border-l-amber-500 p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-black text-white tracking-tight uppercase">Live Scoring Dashboard</h2>
+    <p class="text-sm text-slate-400 font-medium">Real-time match scoring — Administrator Control Mode</p>
+    {% if g.admin %}
+    <p class="text-xs text-slate-500 mt-2 font-mono">
+        Logged in as: <span class="text-slate-300 font-bold">{{ g.admin.username }}</span>
+    </p>
+    {% endif %}
+</div>
+
+<div class="card mb-6 p-4 bg-slate-900 border border-slate-800 rounded-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-lg">
+    <div class="text-xs font-black tracking-widest text-blue-500 uppercase">Admin Console System Navigation</div>
+    <div class="flex flex-wrap gap-2">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary px-3 py-1.5 text-xs font-bold uppercase rounded">Home</a>
+        <a href="{{ url_for('about') }}" class="btn btn-secondary px-3 py-1.5 text-xs font-bold uppercase rounded">About</a>
+        <a href="{{ url_for('admin_scoring') }}" class="btn btn-secondary px-3 py-1.5 text-xs font-bold uppercase rounded">Live Scoring</a>
+        <a href="{{ url_for('viewers') }}" class="btn btn-secondary px-3 py-1.5 text-xs font-bold uppercase rounded">Viewer Display</a>
+        <a href="{{ url_for('create_tournament') }}" class="btn btn-primary px-3 py-1.5 text-xs font-bold uppercase rounded bg-blue-600 text-white">Create Tournament</a>
+        <a href="{{ url_for('create_team') }}" class="btn btn-secondary px-3 py-1.5 text-xs font-bold uppercase rounded bg-slate-700 text-white">Create Team</a>
+        <a href="{{ url_for('create_matches') }}" class="btn btn-success px-3 py-1.5 text-xs font-bold uppercase rounded bg-emerald-600 text-white">Create Match</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger px-3 py-1.5 text-xs font-bold uppercase rounded bg-rose-600 text-white">Logout</a>
+    </div>
+</div>
+
+<!-- Match Selector -->
+<div class="card mb-6 p-5 bg-slate-900 border border-slate-800 rounded-lg shadow-md">
+    <h3 class="text-sm font-black text-white uppercase tracking-wider mb-3">Select Match</h3>
+    <div class="score-grid">
+        <div class="form-group">
+            <label for="match_selector" style="color: white;">Choose a Match:</label>
+            <select id="match_selector" name="match_selector" onchange="loadMatch()" style="padding: 8px; border-radius: 4px;">
+                <option value="">-- Select Match --</option>
+            </select>
+        </div>
+        <div style="padding-top: 24px;">
+            <button type="button" onclick="loadMatches()" class="btn btn-primary px-4 py-2 text-xs font-bold uppercase rounded bg-blue-600 text-white">Refresh Matches</button>
+        </div>
+    </div>
+</div>
+
+<div class="court-container court-transition mb-6" id="scoreboard-container" style="display: none;">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="team-card team-a bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-xl border-t-4 border-t-blue-500 text-center">
+            <h3 class="team-name text-xl font-black text-white uppercase tracking-wide" id="team-a-name">Team A</h3>
+            <div class="score-display text-6xl font-mono font-black text-white my-4 transition-all" id="team-a-score">0</div>
+            
+            <div class="my-4 border-t border-b border-slate-800/60 py-3">
+                <h4 class="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-2">Set History Breakdown</h4>
+                <div class="flex justify-center gap-4 text-xs font-mono font-bold text-slate-400" id="team-a-sets">
+                    <div class="set-score bg-[#090d14] px-2 py-1 rounded border border-slate-950">Set 1: 0</div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-3 pt-2">
+                <button type="button" class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="addScore('team-a', 1)">+1 Point</button>
+                <button type="button" class="btn btn-secondary bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="addScore('team-a', 5)">+5 Points</button>
+            </div>
+        </div>
+
+        <div class="team-card team-b bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-xl border-t-4 border-t-amber-500 text-center">
+            <h3 class="team-name text-xl font-black text-white uppercase tracking-wide" id="team-b-name">Team B</h3>
+            <div class="score-display text-6xl font-mono font-black text-white my-4 transition-all" id="team-b-score">0</div>
+            
+            <div class="my-4 border-t border-b border-slate-800/60 py-3">
+                <h4 class="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-2">Set History Breakdown</h4>
+                <div class="flex justify-center gap-4 text-xs font-mono font-bold text-slate-400" id="team-b-sets">
+                    <div class="set-score bg-[#090d14] px-2 py-1 rounded border border-slate-950">Set 1: 0</div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-3 pt-2">
+                <button type="button" class="btn btn-primary bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="addScore('team-b', 1)">+1 Point</button>
+                <button type="button" class="btn btn-secondary bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="addScore('team-b', 5)">+5 Points</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-6 p-5 bg-slate-900 border border-slate-800 rounded-lg shadow-md" id="controls-container" style="display: none;">
+    <h3 class="text-sm font-black text-white uppercase tracking-wider mb-3">Live Match Controls</h3>
+    <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-warning btn-undo bg-amber-500 text-slate-950 text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="undoLastPoint()">↶ Undo Last Point</button>
+        <button type="button" class="btn btn-success btn-end-set bg-emerald-600 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="endSet()">✓ End Set</button>
+        <button type="button" class="btn btn-info bg-cyan-600 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="viewLive()">📺 View Live</button>
+        <button type="button" class="btn btn-danger bg-rose-600 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="concludeMatch()">⊗ Conclude Match</button>
+        <button type="button" class="btn btn-secondary bg-slate-800 text-slate-400 text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="resetScore()">⊙ Reset Scores</button>
+    </div>
+</div>
+
+<!-- Winning Team Selection (shown when match can be concluded) -->
+<div class="card mb-6 p-5 bg-slate-900 border border-slate-800 rounded-lg shadow-md" id="winner-selection-container" style="display: none;">
+    <h3 class="text-sm font-black text-white uppercase tracking-wider mb-3">Select Winning Team</h3>
+    <p class="text-xs text-slate-400 mb-3">One team has reached 25 points. Select the winner to conclude the match.</p>
+    <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-success bg-emerald-600 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="setMatchWinner('teamA')">🏆 Team A Wins</button>
+        <button type="button" class="btn btn-success bg-emerald-600 text-white text-xs font-black uppercase py-2 px-4 rounded shadow" onclick="setMatchWinner('teamB')">🏆 Team B Wins</button>
+    </div>
+</div>
+
+<div class="card mb-6 p-5 bg-slate-900 border border-slate-800 rounded-lg shadow-md" id="metadata-container" style="display: none;">
+    <h3 class="text-sm font-black text-white uppercase tracking-wider mb-3">Court Arena Metadata</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-slate-400">
+        <div class="space-y-2">
+            <p><strong>Tournament:</strong> <span id="tournament-name" class="text-white font-bold ml-1">Not Set</span></p>
+            <p><strong>Active Set:</strong> <span id="current-set" class="text-amber-400 font-mono font-black ml-1">1</span></p>
+        </div>
+        <div class="space-y-2">
+            <p><strong>Points to Win:</strong> <span id="points-to-win" class="text-white font-mono ml-1">25</span></p>
+            <p><strong>Match Status:</strong> <span id="match-status" class="text-blue-400 font-bold ml-1">Not Set</span></p>
+        </div>
+    </div>
+</div>
+
+<div class="card p-5 bg-slate-900 border border-slate-800 rounded-lg shadow-md overflow-hidden" id="history-container" style="display: none;">
+    <h3 class="text-sm font-black text-white uppercase tracking-wider mb-3">Real-time Point Ledger History</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                    <th class="p-3">Timestamp</th>
+                    <th class="p-3">Team</th>
+                    <th class="p-3 text-right">Score</th>
+                </tr>
+            </thead>
+            <tbody id="point-history" class="text-xs text-slate-300 divide-y divide-slate-800/40">
+                <tr>
+                    <td colspan="3" class="p-6 text-center text-slate-500 font-medium">No points scored yet</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentMatch = null;
+let currentSet = null;
+let matchHistory = [];
+
+document.addEventListener("DOMContentLoaded", function() {
+    loadMatches();
+});
+
+function loadMatches() {
+    fetch('/api/tournaments')
+        .then(response => response.json())
+        .then(tournaments => {
+            const promises = tournaments.map(t => 
+                fetch(`/api/tournament/${t.id}/matches`)
+                    .then(r => r.json())
+                    .then(matches => ({tournament: t, matches: matches}))
+            );
+            return Promise.all(promises);
+        })
+        .then(results => {
+            let selector = document.getElementById('match_selector');
+            selector.innerHTML = '<option value="">-- Select Match --</option>';
+            results.forEach(result => {
+                result.matches.forEach(match => {
+                    const option = document.createElement('option');
+                    option.value = match.id;
+                    option.textContent = `${match.team_a_name} vs ${match.team_b_name}`;
+                    selector.appendChild(option);
+                });
+            });
+        })
+        .catch(error => console.error('Error loading matches:', error));
+}
+
+function loadMatch() {
+    const matchId = document.getElementById('match_selector').value;
+    if (!matchId) {
+        document.getElementById('scoreboard-container').style.display = 'none';
+        document.getElementById('controls-container').style.display = 'none';
+        document.getElementById('metadata-container').style.display = 'none';
+        document.getElementById('history-container').style.display = 'none';
+        return;
+    }
+    
+    // Load match details from API
+    fetch(`/api/match/${matchId}`)
+        .then(response => response.json())
+        .then(match => {
+            currentMatch = match;
+            document.getElementById('team-a-name').textContent = match.team_a_name;
+            document.getElementById('team-b-name').textContent = match.team_b_name;
+            document.getElementById('tournament-name').textContent = match.tournament_name;
+            document.getElementById('points-to-win').textContent = match.points_to_win;
+            document.getElementById('match-status').textContent = match.status;
+            
+            // Show scoreboard and controls
+            document.getElementById('scoreboard-container').style.display = 'block';
+            document.getElementById('controls-container').style.display = 'block';
+            document.getElementById('metadata-container').style.display = 'block';
+            document.getElementById('history-container').style.display = 'block';
+            
+            // Load current set
+            loadCurrentSet(match);
+        })
+        .catch(error => console.error('Error loading match:', error));
+}
+
+function loadCurrentSet(match) {
+    // Find ongoing set or use first set
+    let activeSet = match.sets.find(s => s.status === 'ongoing' || s.status === 'scheduled');
+    
+    if (!activeSet && match.sets.length > 0) {
+        activeSet = match.sets[0];
+    }
+    
+    if (activeSet) {
+        currentSet = activeSet;
+        document.getElementById('team-a-score').textContent = activeSet.team_a_score || 0;
+        document.getElementById('team-b-score').textContent = activeSet.team_b_score || 0;
+        document.getElementById('current-set').textContent = activeSet.set_number || match.sets.length;
+    }
+}
+
+function ensureSetExists(matchId) {
+    if (currentSet) return Promise.resolve(currentSet);
+    
+    return fetch('/api/create-set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matchId: matchId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.set) {
+            currentSet = data.set;
+            document.getElementById('current-set').textContent = data.set.set_number;
+        }
+        return currentSet;
+    });
+}
+
+function addScore(team, points) {
+    if (!currentSet || !currentMatch) {
+        alert('No active match selected');
+        return;
+    }
+    
+    const scoreId = team === 'team-a' ? 'team-a-score' : 'team-b-score';
+    const scoreElement = document.getElementById(scoreId);
+    let currentScore = parseInt(scoreElement.textContent) || 0;
+    currentScore += points;
+    scoreElement.textContent = currentScore;
+    
+    // Add to history
+    const timestamp = new Date().toLocaleTimeString();
+    const teamName = team === 'team-a' ? document.getElementById('team-a-name').textContent : document.getElementById('team-b-name').textContent;
+    addToHistory(timestamp, teamName, currentScore);
+    
+    // Send to server
+    fetch('/api/score-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            setId: currentSet.id,
+            team: team === 'team-a' ? 'teamA' : 'teamB',
+            points: points
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status !== 'success') {
+            console.error('Failed to update score:', data);
+            showAlert(data.error || 'Failed to update score', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating score:', error);
+        showAlert('Error updating score: ' + error, 'danger');
+    });
+    
+    // Check if match can be concluded (25 points with 2 point lead)
+    const pointsToWin = parseInt(document.getElementById('points-to-win').textContent) || 25;
+    const teamAScore = parseInt(document.getElementById('team-a-score').textContent) || 0;
+    const teamBScore = parseInt(document.getElementById('team-b-score').textContent) || 0;
+    
+    const leadingTeam = teamAScore > teamBScore ? 'team-a' : 'team-b';
+    const leadingScore = teamAScore > teamBScore ? teamAScore : teamBScore;
+    const trailingScore = teamAScore > teamBScore ? teamBScore : teamAScore;
+    
+    if (leadingScore >= pointsToWin && (leadingScore - trailingScore) >= 2) {
+        // Show winner selection
+        document.getElementById('winner-selection-container').style.display = 'block';
+        document.getElementById('controls-container').style.display = 'none';
+    }
+}
+
+function undoLastPoint() {
+    if (!currentSet || !currentMatch) {
+        alert('No active set');
+        return;
+    }
+    
+    fetch('/api/undo-point', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ setId: currentSet.id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('team-a-score').textContent = data.scores.teamA;
+            document.getElementById('team-b-score').textContent = data.scores.teamB;
+            showAlert('Point undone', 'success');
+        } else {
+            showAlert(data.error || 'Failed to undo point', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error undoing point:', error);
+        showAlert('Failed to undo point: ' + error, 'danger');
+    });
+}
+
+function endSet() {
+    if (!currentSet || !currentMatch) return;
+    
+    if (confirm('Are you sure you want to end this set?')) {
+        fetch('/api/end-set', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ setId: currentSet.id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('team-a-score').textContent = '0';
+                document.getElementById('team-b-score').textContent = '0';
+                currentSet = data.set;
+                showAlert('Set ended', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Error ending set:', error);
+            showAlert('Failed to end set', 'danger');
+        });
+    }
+}
+
+function concludeMatch() {
+    if (confirm('Are you sure you want to conclude this match?')) {
+        // Show winner selection
+        document.getElementById('winner-selection-container').style.display = 'block';
+        document.getElementById('controls-container').style.display = 'none';
+    }
+}
+
+function setMatchWinner(team) {
+    if (!currentMatch || !currentSet) return;
+    
+    fetch('/api/set-match-winner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            matchId: currentMatch.id, 
+            winner: team === 'team-a' ? 'teamA' : 'teamB'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showAlert(`${team === 'team-a' ? 'Team A' : 'Team B'} declared as winner!`, 'success');
+            document.getElementById('winner-selection-container').style.display = 'none';
+            if (currentMatch) {
+                document.getElementById('scoreboard-container').style.display = 'none';
+            }
+        } else {
+            showAlert(data.error || 'Failed to set winner', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error setting winner:', error);
+        showAlert('Failed to set winner: ' + error, 'danger');
+    });
+}
+
+function resetScore() {
+    document.getElementById('team-a-score').textContent = '0';
+    document.getElementById('team-b-score').textContent = '0';
+    matchHistory = [];
+    document.getElementById('point-history').innerHTML = '<tr><td colspan="3" class="p-6 text-center text-slate-500 font-medium">No points scored yet</td></tr>';
+}
+
+function winSet(team) {
+    const setNum = parseInt(document.getElementById('current-set').textContent) || 1;
+    alert(`${team === 'team-a' ? 'Team A' : 'Team B'} won Set ${setNum}!`);
+}
+
+function addToHistory(timestamp, team, score) {
+    const historyBody = document.getElementById('point-history');
+    if (historyBody.children.length === 1 && historyBody.children[0].textContent.includes('No points')) {
+        historyBody.innerHTML = '';
+    }
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td class="p-3">${timestamp}</td>
+        <td class="p-3">${team}</td>
+        <td class="p-3 text-right">${score}</td>
+    `;
+    historyBody.insertBefore(row, historyBody.firstChild);
+}
+
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-' + type;
+    alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: #131a2a; color: white; border-left: 4px solid #3b82f6; z-index: 9999; border-radius: 4px;';
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 3000);
+}
+
+function viewLive() {
+    if (!currentMatch) return;
+    window.open('/viewers', '_blank');
+}
+</script>
+{% endblock %}
