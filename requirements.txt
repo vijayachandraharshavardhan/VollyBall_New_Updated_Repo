@@ -1,6 +1,7 @@
 flask
 flask-sqlalchemy
 werkzeug
-psycopg2-binary
+pymysql
+cryptography
 gunicorn
 python-dotenv

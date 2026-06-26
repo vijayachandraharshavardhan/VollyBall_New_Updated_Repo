@@ -81,10 +81,7 @@ class Set(db.Model):
 # Initialize database
 def init_db():
     with app.app_context():
-        if not os.path.exists('database.db'):
-            db.create_all()
-        else:
-            db.create_all()
+        db.create_all()
 
 def login_required(view):
     @wraps(view)
