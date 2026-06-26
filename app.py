@@ -361,12 +361,13 @@ def get_score_updates():
     updates = {}
     for match in matches:
         sets = Set.query.filter_by(match_id=match.id).order_by(Set.set_number).all()
+        active_set = next((s for s in sets if s.status == 'ongoing'), sets[-1] if sets else None)
         updates[match.id] = {
             'team_a_name': match.team_a.name if match.team_a else 'Team A',
             'team_b_name': match.team_b.name if match.team_b else 'Team B',
-            'teamAScore': sets[-1].team_a_score if sets else 0,
-            'teamBScore': sets[-1].team_b_score if sets else 0,
-            'current_set': len(sets),
+            'teamAScore': active_set.team_a_score if active_set else 0,
+            'teamBScore': active_set.team_b_score if active_set else 0,
+            'current_set': active_set.set_number if active_set else 1,
             'status': match.status,
             'tournament_name': match.tournament.name if match.tournament else '',
             'winner_team_id': match.winner_team_id
@@ -397,7 +398,8 @@ def get_tournament_matches(tournament_id):
     return jsonify([{
         'id': m.id,
         'team_a_name': m.team_a.name if m.team_a else 'Team A',
-        'team_b_name': m.team_b.name if m.team_b else 'Team B'
+        'team_b_name': m.team_b.name if m.team_b else 'Team B',
+        'status': m.status
     } for m in matches])
 
 @app.route('/api/tournament/<int:tournament_id>/teams', methods=['GET'])
