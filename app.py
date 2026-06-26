@@ -428,6 +428,53 @@ def get_tournament_matches(tournament_id):
         'status': m.status
     } for m in matches])
 
+@app.route('/api/all-matches', methods=['GET'])
+@login_required
+def get_all_matches():
+    """Single-query endpoint: all tournaments + matches for the admin scoring page"""
+    tournaments = Tournament.query.filter_by(admin_id=g.admin.id).all()
+    t_ids = [t.id for t in tournaments]
+    t_map = {t.id: t.name for t in tournaments}
+    matches = Match.query.options(
+        db.joinedload(Match.team_a),
+        db.joinedload(Match.team_b)
+    ).filter(Match.tournament_id.in_(t_ids)).all()
+    result = []
+    for m in matches:
+        result.append({
+            'id': m.id,
+            'tournament_id': m.tournament_id,
+            'tournament_name': t_map.get(m.tournament_id, ''),
+            'team_a_name': m.team_a.name if m.team_a else 'Team A',
+            'team_b_name': m.team_b.name if m.team_b else 'Team B',
+            'status': m.status,
+        })
+    return jsonify(result)
+
+@app.route('/api/public/all-matches', methods=['GET'])
+def get_public_all_matches():
+    """Single-query endpoint: all public matches for the viewer page"""
+    tournaments = Tournament.query.all()
+    t_map = {t.id: t.name for t in tournaments}
+    matches = Match.query.options(
+        db.joinedload(Match.team_a),
+        db.joinedload(Match.team_b)
+    ).all()
+    result = []
+    for m in matches:
+        result.append({
+            'id': m.id,
+            'tournament_id': m.tournament_id,
+            'tournament_name': t_map.get(m.tournament_id, ''),
+            'team_a_id': m.team_a_id,
+            'team_b_id': m.team_b_id,
+            'team_a_name': m.team_a.name if m.team_a else 'Team A',
+            'team_b_name': m.team_b.name if m.team_b else 'Team B',
+            'points_to_win': m.points_to_win,
+            'status': m.status,
+        })
+    return jsonify(result)
+
 @app.route('/api/tournament/<int:tournament_id>/teams', methods=['GET'])
 @login_required
 def get_tournament_teams(tournament_id):

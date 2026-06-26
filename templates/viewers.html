@@ -223,32 +223,18 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadAllMatches() {
-    fetch('/api/public/tournaments')
-        .then(response => response.json())
-        .then(tournaments => {
+    fetch('/api/public/all-matches')
+        .then(r => r.json())
+        .then(matches => {
             let selector = document.getElementById('viewer_match_selector');
-            let currentValue = selector.value;
             selector.innerHTML = '<option value="">-- Select Match --</option><option value="live">🔥 Current Live Match</option>';
-            
-            const promises = tournaments.map(t => 
-                fetch(`/api/public/tournament/${t.id}/matches`)
-                    .then(r => r.json())
-                    .then(matches => ({tournament: t, matches: matches}))
-                    .catch(e => ({tournament: t, matches: []}))
-            );
-            
-            return Promise.all(promises);
-        })
-        .then(results => {
-            let selector = document.getElementById('viewer_match_selector');
-            results.forEach(result => {
-                result.matches.forEach(match => {
-                    const option = document.createElement('option');
-                    option.value = match.id;
-                    option.textContent = `${match.team_a_name} vs ${match.team_b_name} (${result.tournament.name})`;
-                    selector.appendChild(option);
-                    allMatches.push({...match, tournament: result.tournament});
-                });
+            allMatches = [];
+            matches.forEach(match => {
+                const option = document.createElement('option');
+                option.value = match.id;
+                option.textContent = `${match.team_a_name} vs ${match.team_b_name} (${match.tournament_name})`;
+                selector.appendChild(option);
+                allMatches.push({...match, tournament: {id: match.tournament_id, name: match.tournament_name}});
             });
         })
         .catch(error => console.error('Error loading matches:', error));
@@ -370,7 +356,6 @@ function refreshViewerScore() {
         .catch(error => console.error('Error fetching score updates:', error));
 }
 
-// Also load matches periodically
-setInterval(loadAllMatches, 10000);
+
 </script>
 {% endblock %}

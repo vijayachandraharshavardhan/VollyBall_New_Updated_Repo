@@ -149,29 +149,18 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadMatches() {
-    fetch('/api/tournaments')
-        .then(response => response.json())
-        .then(tournaments => {
-            const promises = tournaments.map(t =>
-                fetch(`/api/tournament/${t.id}/matches`)
-                    .then(r => r.json())
-                    .then(matches => ({tournament: t, matches: matches}))
-            );
-            return Promise.all(promises);
-        })
-        .then(results => {
+    fetch('/api/all-matches')
+        .then(r => r.json())
+        .then(matches => {
             let selector = document.getElementById('match_selector');
             selector.innerHTML = '<option value="">-- Select Match --</option>';
-            results.forEach(result => {
-                result.matches.forEach(match => {
-                    const option = document.createElement('option');
-                    option.value = match.id;
-                    const label = match.status === 'completed'
-                        ? `✅ ${match.team_a_name} vs ${match.team_b_name} (Completed)`
-                        : `🏐 ${match.team_a_name} vs ${match.team_b_name}`;
-                    option.textContent = label;
-                    selector.appendChild(option);
-                });
+            matches.forEach(match => {
+                const option = document.createElement('option');
+                option.value = match.id;
+                option.textContent = match.status === 'completed'
+                    ? `✅ ${match.team_a_name} vs ${match.team_b_name} (${match.tournament_name})`
+                    : `🏐 ${match.team_a_name} vs ${match.team_b_name} (${match.tournament_name})`;
+                selector.appendChild(option);
             });
         })
         .catch(error => console.error('Error loading matches:', error));
