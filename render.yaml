@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: volleyball-live-scorer
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
