@@ -2,37 +2,82 @@
 
 {% block title %}Admin Registration - Volleyball Live Scorer{% endblock %}
 
+{% block extra_css %}
+<style>
+.register-panel {
+    max-width: 540px;
+    margin: 0 auto;
+    background: rgba(15,21,34,0.95);
+    border: 1px solid rgba(148,163,184,0.12);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    overflow: hidden;
+}
+.register-panel .hero-header {
+    background: linear-gradient(135deg,rgba(16,185,129,0.9),rgba(59,130,246,0.9));
+    padding: 2rem 1.5rem;
+    color: white;
+}
+.register-panel .hero-header h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
+.register-panel .hero-header p { opacity: 0.9; font-size: 0.9rem; }
+.register-panel .form-body { padding: 2rem; }
+.register-panel .form-group label { color: #cbd5e1; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.register-panel .form-group input {
+    width: 100%; padding: 0.9rem 1rem; border-radius: 12px;
+    border: 1px solid rgba(148,163,184,0.2); background: rgba(11,17,32,0.98);
+    color: #f8fafc !important; font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+.register-panel .form-group input::placeholder { color: rgba(148,163,184,0.5) !important; }
+.register-panel .form-group input:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+.register-panel .form-group input:-webkit-autofill,
+.register-panel .form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f8fafc !important;
+    box-shadow: 0 0 0px 1000px rgba(11,17,32,0.98) inset !important;
+}
+.register-panel .btn-register {
+    width: 100%; padding: 1rem; border-radius: 12px; border: none; cursor: pointer;
+    background: linear-gradient(135deg,#10b981,#059669); color: white;
+    font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    transition: all 0.2s ease; margin-top: 0.5rem;
+}
+.register-panel .btn-register:hover { background: linear-gradient(135deg,#34d399,#10b981); transform: translateY(-1px); }
+.register-panel .login-link { text-align: center; margin-top: 1.25rem; color: #64748b; font-size: 0.875rem; }
+.register-panel .login-link a { color: #10b981; font-weight: 700; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width: 500px; margin: 0 auto;">
-    <h2>Admin Registration</h2>
-    <p>Create a new admin account to manage tournaments and matches</p>
-
-    <form method="POST" action="{{ url_for('register') }}">
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required placeholder="Enter your username">
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required placeholder="Enter your email">
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required placeholder="Create a password">
-        </div>
-
-        <div class="form-group">
-            <label for="confirm_password">Confirm Password:</label>
-            <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repeat your password">
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Register</button>
-    </form>
-
-    <p style="text-align: center; margin-top: 1rem;">
-        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
-    </p>
+<div class="register-panel">
+    <div class="hero-header">
+        <h2>Create Admin Account</h2>
+        <p>Register to manage tournaments and live scoring for your events.</p>
+    </div>
+    <div class="form-body">
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Choose a username" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="email">
+            </div>
+            <div class="two-col">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Create password" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repeat password" autocomplete="new-password">
+                </div>
+            </div>
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
+        <p class="login-link">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
 </div>
 {% endblock %}

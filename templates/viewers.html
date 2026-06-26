@@ -166,19 +166,22 @@
                 <div class="viewers-team-name" id="viewer-team-a-name">Team A</div>
                 <div class="viewers-score" id="viewer-team-a-score">0</div>
                 <div class="set-display">
-                    Current Set: <span id="viewer-current-set">1</span>
+                    Sets Won: <span id="viewer-team-a-sets-won">0</span>
                 </div>
             </div>
-            
+
             <!-- VS Divider -->
-            <div class="vs-divider">VS</div>
-            
+            <div class="vs-divider" style="flex-direction:column; gap:0.5rem;">
+                <div id="viewer-set-label" style="font-size:1rem; color:#f59e0b; font-weight:800; letter-spacing:2px;">SET 1</div>
+                <div>VS</div>
+            </div>
+
             <!-- Team B -->
             <div class="team-section team-b-section">
                 <div class="viewers-team-name" id="viewer-team-b-name">Team B</div>
                 <div class="viewers-score" id="viewer-team-b-score">0</div>
                 <div class="set-display">
-                    Sets Won: <span id="viewer-team-b-sets">0</span>
+                    Sets Won: <span id="viewer-team-b-sets-won">0</span>
                 </div>
             </div>
         </div>
@@ -277,11 +280,7 @@ function loadViewerMatch() {
             .then(response => response.json())
             .then(data => {
                 if (data.updates && data.updates[matchId]) {
-                    const matchUpdate = data.updates[matchId];
-                    document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
-                    document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
-                    document.getElementById('viewer-current-set').textContent = matchUpdate.current_set || 1;
-                    document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+                    applyScoreUpdate(data.updates[matchId]);
                 }
             })
             .catch(error => console.error('Error fetching score updates:', error));
@@ -315,11 +314,7 @@ function loadLiveMatch() {
                     .then(response => response.json())
                     .then(scoreData => {
                         if (scoreData.updates && scoreData.updates[currentViewerMatch.id]) {
-                            const matchUpdate = scoreData.updates[currentViewerMatch.id];
-                            document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
-                            document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
-                            document.getElementById('viewer-current-set').textContent = matchUpdate.current_set || 1;
-                            document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+                            applyScoreUpdate(scoreData.updates[currentViewerMatch.id]);
                         }
                     })
                     .catch(error => console.error('Error fetching score updates:', error));
@@ -335,6 +330,28 @@ function loadLiveMatch() {
         .catch(error => console.error('Error fetching live match:', error));
 }
 
+function applyScoreUpdate(matchUpdate) {
+    document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
+    document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
+    document.getElementById('viewer-team-a-sets-won').textContent = matchUpdate.team_a_sets_won || 0;
+    document.getElementById('viewer-team-b-sets-won').textContent = matchUpdate.team_b_sets_won || 0;
+    document.getElementById('viewer-set-label').textContent = 'SET ' + (matchUpdate.current_set || 1);
+    document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+
+    const teamASection = document.querySelector('.team-a-section');
+    const teamBSection = document.querySelector('.team-b-section');
+    if (matchUpdate.status === 'completed' && matchUpdate.winner_team_id) {
+        if (currentViewerMatch && matchUpdate.winner_team_id == currentViewerMatch.team_a_id) {
+            teamASection.classList.add('winner'); teamBSection.classList.add('loser');
+        } else {
+            teamBSection.classList.add('winner'); teamASection.classList.add('loser');
+        }
+    } else {
+        teamASection.classList.remove('winner', 'loser');
+        teamBSection.classList.remove('winner', 'loser');
+    }
+}
+
 function refreshViewerScore() {
     if (!currentViewerMatch) return;
     
@@ -347,28 +364,7 @@ function refreshViewerScore() {
         .then(response => response.json())
         .then(data => {
             if (data.updates && data.updates[currentViewerMatch.id]) {
-                const matchUpdate = data.updates[currentViewerMatch.id];
-                document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
-                document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
-                document.getElementById('viewer-current-set').textContent = matchUpdate.current_set || 1;
-                document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
-                
-                // Show winner/loser if match is completed
-                const teamASection = document.querySelector('.team-a-section');
-                const teamBSection = document.querySelector('.team-b-section');
-                
-                if (matchUpdate.status === 'completed' && matchUpdate.winner_team_id) {
-                    if (matchUpdate.winner_team_id == currentViewerMatch.team_a_id) {
-                        teamASection.classList.add('winner');
-                        teamBSection.classList.add('loser');
-                    } else if (matchUpdate.winner_team_id == currentViewerMatch.team_b_id) {
-                        teamBSection.classList.add('winner');
-                        teamASection.classList.add('loser');
-                    }
-                } else {
-                    teamASection.classList.remove('winner', 'loser');
-                    teamBSection.classList.remove('winner', 'loser');
-                }
+                applyScoreUpdate(data.updates[currentViewerMatch.id]);
             }
         })
         .catch(error => console.error('Error fetching score updates:', error));

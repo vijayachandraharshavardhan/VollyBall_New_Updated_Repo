@@ -18,6 +18,9 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
 
 db = SQLAlchemy(app)
 
+with app.app_context():
+    db.create_all()
+
 class Admin(db.Model):
     __tablename__ = 'admins'
     id = db.Column(db.Integer, primary_key=True)
@@ -280,6 +283,10 @@ def create_matches():
             flash('All match fields are required.', 'danger')
             return render_template('create_matches.html', tournaments=tournaments)
 
+        if team_a_id == team_b_id:
+            flash('Team A and Team B cannot be the same team.', 'danger')
+            return render_template('create_matches.html', tournaments=tournaments)
+
         tournament = Tournament.query.get(tournament_id)
         if not tournament or tournament.admin_id != g.admin.id:
             flash('Invalid tournament selected.', 'danger')
@@ -362,6 +369,8 @@ def get_score_updates():
     for match in matches:
         sets = Set.query.filter_by(match_id=match.id).order_by(Set.set_number).all()
         active_set = next((s for s in sets if s.status == 'ongoing'), sets[-1] if sets else None)
+        team_a_sets_won = sum(1 for s in sets if s.status == 'completed' and s.team_a_score > s.team_b_score)
+        team_b_sets_won = sum(1 for s in sets if s.status == 'completed' and s.team_b_score > s.team_a_score)
         updates[match.id] = {
             'team_a_name': match.team_a.name if match.team_a else 'Team A',
             'team_b_name': match.team_b.name if match.team_b else 'Team B',
@@ -370,7 +379,9 @@ def get_score_updates():
             'current_set': active_set.set_number if active_set else 1,
             'status': match.status,
             'tournament_name': match.tournament.name if match.tournament else '',
-            'winner_team_id': match.winner_team_id
+            'winner_team_id': match.winner_team_id,
+            'team_a_sets_won': team_a_sets_won,
+            'team_b_sets_won': team_b_sets_won
         }
     
     return jsonify({'updates': updates})
@@ -451,6 +462,7 @@ def get_public_tournament_matches(tournament_id):
         'team_a_name': m.team_a.name if m.team_a else 'Team A',
         'team_b_name': m.team_b.name if m.team_b else 'Team B',
         'points_to_win': m.points_to_win,
+        'status': m.status,
         'status': m.status
     } for m in matches])
 

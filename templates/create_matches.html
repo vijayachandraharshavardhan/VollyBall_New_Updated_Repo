@@ -3,13 +3,19 @@
 {% block title %}Create Matches - Volleyball Live Scorer{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Create Matches</h2>
-    <p>Setup matches for your tournament</p>
+<div class="page-header">
+    <h2>Create Match</h2>
+    <p>Schedule a new match between two teams in a tournament.</p>
+</div>
 
-    <form method="POST" action="{{ url_for('create_matches') }}">
+<div class="card">
+    <div id="same-team-error" class="alert alert-danger" style="display:none;">
+        Team A and Team B cannot be the same team. Please select two different teams.
+    </div>
+
+    <form method="POST" action="{{ url_for('create_matches') }}" id="match-form">
         <div class="form-group">
-            <label for="tournament_id">Select Tournament:</label>
+            <label for="tournament_id">Select Tournament</label>
             <select id="tournament_id" name="tournament_id" required onchange="updateTeamOptions()">
                 <option value="">-- Select Tournament --</option>
                 {% for tournament in tournaments %}
@@ -18,65 +24,92 @@
             </select>
         </div>
 
-        <h3>Match Details</h3>
-
         <div class="score-grid">
             <div class="form-group">
-                <label for="team_a_id">Team A:</label>
-                <select id="team_a_id" name="team_a_id" required>
+                <label for="team_a_id">Team A</label>
+                <select id="team_a_id" name="team_a_id" required onchange="validateTeams()">
                     <option value="">-- Select Team --</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label for="team_b_id">Team B:</label>
-                <select id="team_b_id" name="team_b_id" required>
+                <label for="team_b_id">Team B</label>
+                <select id="team_b_id" name="team_b_id" required onchange="validateTeams()">
                     <option value="">-- Select Team --</option>
                 </select>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="points_to_win">Points to Win Set:</label>
-            <input type="number" id="points_to_win" name="points_to_win" min="15" max="50" value="25" required placeholder="e.g., 25">
-            <small style="display: block; margin-top: 5px; color: #666;">Standard is 25 points to win a set</small>
+            <label for="points_to_win">Points to Win a Set</label>
+            <input type="number" id="points_to_win" name="points_to_win" min="15" max="50" value="25" required>
+            <small style="display:block; margin-top:6px; color:#475569; font-size:0.8rem;">Standard volleyball uses 25 points to win a set.</small>
         </div>
 
         <div class="controls">
-            <button type="submit" class="btn btn-primary">Create Match</button>
+            <button type="submit" id="submit-btn" class="btn btn-amber">Create Match</button>
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 function updateTeamOptions() {
     const tournamentId = document.getElementById('tournament_id').value;
     const teamASelect = document.getElementById('team_a_id');
     const teamBSelect = document.getElementById('team_b_id');
-    
-    // Clear existing options
+
     teamASelect.innerHTML = '<option value="">-- Select Team --</option>';
     teamBSelect.innerHTML = '<option value="">-- Select Team --</option>';
-    
+    document.getElementById('same-team-error').style.display = 'none';
+
     if (!tournamentId) return;
-    
+
     fetch(`/api/tournament/${tournamentId}/teams`)
-        .then(response => response.json())
+        .then(r => r.json())
         .then(teams => {
             teams.forEach(team => {
-                const optionA = document.createElement('option');
-                optionA.value = team.id;
-                optionA.textContent = team.name;
-                teamASelect.appendChild(optionA);
-                
-                const optionB = document.createElement('option');
-                optionB.value = team.id;
-                optionB.textContent = team.name;
-                teamBSelect.appendChild(optionB);
+                const oA = document.createElement('option');
+                oA.value = team.id;
+                oA.textContent = team.name;
+                teamASelect.appendChild(oA);
+
+                const oB = document.createElement('option');
+                oB.value = team.id;
+                oB.textContent = team.name;
+                teamBSelect.appendChild(oB);
             });
         })
-        .catch(error => console.error('Error fetching teams:', error));
+        .catch(e => console.error('Error fetching teams:', e));
 }
+
+function validateTeams() {
+    const aVal = document.getElementById('team_a_id').value;
+    const bVal = document.getElementById('team_b_id').value;
+    const errorDiv = document.getElementById('same-team-error');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (aVal && bVal && aVal === bVal) {
+        errorDiv.style.display = 'block';
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+    } else {
+        errorDiv.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+    }
+}
+
+document.getElementById('match-form').addEventListener('submit', function(e) {
+    const aVal = document.getElementById('team_a_id').value;
+    const bVal = document.getElementById('team_b_id').value;
+    if (aVal && bVal && aVal === bVal) {
+        e.preventDefault();
+        document.getElementById('same-team-error').style.display = 'block';
+    }
+});
 </script>
 {% endblock %}
