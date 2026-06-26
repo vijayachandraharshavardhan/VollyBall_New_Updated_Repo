@@ -14,7 +14,13 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 280,
+    'pool_size': 2,
+    'max_overflow': 3,
+    'connect_args': {'connect_timeout': 10},
+}
 
 db = SQLAlchemy(app)
 
@@ -103,6 +109,15 @@ def load_logged_in_admin():
         g.admin = Admin.query.get(admin_id)
 
 # Routes
+@app.route('/health')
+def health():
+    """Keep-alive endpoint — pings DB so Neon never sleeps"""
+    try:
+        db.session.execute(db.text('SELECT 1'))
+        return jsonify({'status': 'ok'}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'detail': str(e)}), 500
+
 @app.route('/')
 def index():
     """Landing page"""
