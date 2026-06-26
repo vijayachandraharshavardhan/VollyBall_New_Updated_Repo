@@ -379,10 +379,16 @@ def get_score_updates():
         db.joinedload(Match.team_b),
         db.joinedload(Match.tournament)
     ).all()
-    
+
+    # Load ALL sets in one query, group by match_id in Python — eliminates N+1
+    all_sets = Set.query.order_by(Set.match_id, Set.set_number).all()
+    sets_by_match = {}
+    for s in all_sets:
+        sets_by_match.setdefault(s.match_id, []).append(s)
+
     updates = {}
     for match in matches:
-        sets = Set.query.filter_by(match_id=match.id).order_by(Set.set_number).all()
+        sets = sets_by_match.get(match.id, [])
         active_set = next((s for s in sets if s.status == 'ongoing'), sets[-1] if sets else None)
         team_a_sets_won = sum(1 for s in sets if s.status == 'completed' and s.team_a_score > s.team_b_score)
         team_b_sets_won = sum(1 for s in sets if s.status == 'completed' and s.team_b_score > s.team_a_score)
@@ -398,7 +404,7 @@ def get_score_updates():
             'team_a_sets_won': team_a_sets_won,
             'team_b_sets_won': team_b_sets_won
         }
-    
+
     return jsonify({'updates': updates})
 
 @app.route('/api/tournaments', methods=['GET'])

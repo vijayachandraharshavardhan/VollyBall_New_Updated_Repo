@@ -219,7 +219,7 @@ let refreshInterval = null;
 
 document.addEventListener("DOMContentLoaded", function() {
     loadAllMatches();
-    refreshInterval = setInterval(refreshViewerScore, 3000);
+    refreshInterval = setInterval(refreshViewerScore, 5000);
 });
 
 function loadAllMatches() {
@@ -273,7 +273,7 @@ function loadViewerMatch() {
         
         // Start refresh interval if not running
         if (!refreshInterval) {
-            refreshInterval = setInterval(refreshViewerScore, 3000);
+            refreshInterval = setInterval(refreshViewerScore, 5000);
         }
     }
 }
@@ -306,7 +306,7 @@ function loadLiveMatch() {
                     .catch(error => console.error('Error fetching score updates:', error));
                 
                 if (!refreshInterval) {
-                    refreshInterval = setInterval(refreshViewerScore, 3000);
+                    refreshInterval = setInterval(refreshViewerScore, 5000);
                 }
             } else {
                 showAlert('No live match currently active', 'info');
