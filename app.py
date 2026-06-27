@@ -113,12 +113,27 @@ def login_required(view):
         return view(**kwargs)
     return wrapped_view
 
+class _SessionAdmin:
+    """Lightweight admin object built from session — avoids a DB hit on every request."""
+    __slots__ = ('id', 'username')
+    def __init__(self, id, username):
+        self.id = id
+        self.username = username
+
 @app.before_request
 def load_logged_in_admin():
     admin_id = session.get('admin_id')
     g.admin = None
     if admin_id is not None:
-        g.admin = Admin.query.get(admin_id)
+        username = session.get('admin_username')
+        if username:
+            g.admin = _SessionAdmin(id=admin_id, username=username)
+        else:
+            # Fallback for old sessions that don't have username cached
+            admin = Admin.query.get(admin_id)
+            if admin:
+                session['admin_username'] = admin.username
+                g.admin = admin
 
 # Routes
 @app.route('/health')
@@ -380,11 +395,15 @@ def score_update():
     elif team == 'teamB':
         set_record.team_b_score += points
     
+    match_id = set_record.match_id
     db.session.commit()
+    # Bust score caches so viewers see the new score immediately
+    cache.delete('all_score_updates')
+    cache.delete(f'score_update_{match_id}')
     return jsonify({'status': 'success', 'set_id': set_id})
 
 @app.route('/api/score-updates', methods=['GET'])
-@cache.cached(timeout=4)
+@cache.cached(timeout=4, key_prefix='all_score_updates')
 def get_score_updates():
     """API endpoint for viewers to get current score updates for all matches"""
     matches = Match.query.options(
@@ -598,9 +617,11 @@ def undo_point():
         else:
             set_record.team_b_score = max(0, set_record.team_b_score - 1)
         db.session.commit()
-    
+        cache.delete('all_score_updates')
+        cache.delete(f'score_update_{set_record.match_id}')
+
     return jsonify({
-        'status': 'success', 
+        'status': 'success',
         'scores': {'teamA': set_record.team_a_score, 'teamB': set_record.team_b_score}
     })
 
@@ -620,12 +641,14 @@ def end_set():
         return jsonify({'error': 'Unauthorized'}), 403
     
     set_record.status = 'completed'
-    
+
     next_set = Set.query.filter_by(match_id=match.id).count() + 1
     new_set = Set(match_id=match.id, set_number=next_set)
     db.session.add(new_set)
     db.session.commit()
-    
+    cache.delete('all_score_updates')
+    cache.delete(f'score_update_{match.id}')
+
     return jsonify({'status': 'success', 'set': {'id': new_set.id, 'set_number': new_set.set_number}})
 
 @app.route('/api/match/<int:match_id>', methods=['GET'])
