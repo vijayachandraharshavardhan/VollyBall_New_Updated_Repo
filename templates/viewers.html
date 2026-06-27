@@ -217,74 +217,71 @@ let allMatches = [];
 let currentViewerMatch = null;
 let refreshInterval = null;
 
-document.addEventListener("DOMContentLoaded", function() {
-    loadAllMatches();
-    refreshInterval = setInterval(refreshViewerScore, 5000);
+document.addEventListener("DOMContentLoaded", loadAllMatches);
+
+// Pause polling when tab is hidden, resume instantly when visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
+    } else if (currentViewerMatch) {
+        refreshViewerScore();
+        refreshInterval = setInterval(refreshViewerScore, 5000);
+    }
 });
 
 function loadAllMatches() {
     fetch('/api/public/all-matches')
         .then(r => r.json())
         .then(matches => {
-            let selector = document.getElementById('viewer_match_selector');
+            const selector = document.getElementById('viewer_match_selector');
             selector.innerHTML = '<option value="">-- Select Match --</option><option value="live">🔥 Current Live Match</option>';
             allMatches = [];
-            matches.forEach(match => {
-                const option = document.createElement('option');
-                option.value = match.id;
-                option.textContent = `${match.team_a_name} vs ${match.team_b_name} (${match.tournament_name})`;
-                selector.appendChild(option);
-                allMatches.push({...match, tournament: {id: match.tournament_id, name: match.tournament_name}});
+            matches.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = `${m.team_a_name} vs ${m.team_b_name} (${m.tournament_name})`;
+                selector.appendChild(opt);
+                allMatches.push({...m, tournament: {id: m.tournament_id, name: m.tournament_name}});
             });
         })
-        .catch(error => console.error('Error loading matches:', error));
+        .catch(e => console.error('Error loading matches:', e));
+}
+
+function startPolling() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshViewerScore();
+    refreshInterval = setInterval(refreshViewerScore, 5000);
 }
 
 function loadViewerMatch() {
     const matchId = document.getElementById('viewer_match_selector').value;
     if (!matchId) {
         document.getElementById('viewer-scoreboard').style.display = 'none';
-        if (refreshInterval) clearInterval(refreshInterval);
+        if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
         return;
     }
-    
-    if (matchId === 'live') {
-        loadLiveMatch();
-        return;
-    }
-    
+    if (matchId === 'live') { loadLiveMatch(); return; }
+
     currentViewerMatch = allMatches.find(m => m.id == matchId);
     if (currentViewerMatch) {
         document.getElementById('viewer-scoreboard').style.display = 'block';
         document.getElementById('viewer-team-a-name').textContent = currentViewerMatch.team_a_name;
         document.getElementById('viewer-team-b-name').textContent = currentViewerMatch.team_b_name;
         document.getElementById('viewer-tournament').textContent = currentViewerMatch.tournament.name;
-        document.getElementById('viewer-points-to-win').textContent = currentViewerMatch.points_to_win;
-        
-        // Immediately fetch current scores
-        fetch('/api/score-updates')
-            .then(response => response.json())
-            .then(data => {
-                if (data.updates && data.updates[matchId]) {
-                    applyScoreUpdate(data.updates[matchId]);
-                }
-            })
-            .catch(error => console.error('Error fetching score updates:', error));
-        
-        // Start refresh interval if not running
-        if (!refreshInterval) {
-            refreshInterval = setInterval(refreshViewerScore, 5000);
-        }
+        document.getElementById('viewer-points-to-win').textContent = currentViewerMatch.points_to_win || 25;
+        startPolling();
     }
 }
 
 function loadLiveMatch() {
     fetch('/api/current-live-match')
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.match) {
                 currentViewerMatch = {
                     id: data.match.id,
+                    team_a_id: data.match.team_a_id,
+                    team_b_id: data.match.team_b_id,
                     team_a_name: data.match.team_a_name,
                     team_b_name: data.match.team_b_name,
                     tournament: { name: data.match.tournament_name },
@@ -294,68 +291,52 @@ function loadLiveMatch() {
                 document.getElementById('viewer-team-a-name').textContent = currentViewerMatch.team_a_name;
                 document.getElementById('viewer-team-b-name').textContent = currentViewerMatch.team_b_name;
                 document.getElementById('viewer-tournament').textContent = currentViewerMatch.tournament.name;
-                document.getElementById('viewer-points-to-win').textContent = currentViewerMatch.points_to_win;
-                
-                fetch('/api/score-updates')
-                    .then(response => response.json())
-                    .then(scoreData => {
-                        if (scoreData.updates && scoreData.updates[currentViewerMatch.id]) {
-                            applyScoreUpdate(scoreData.updates[currentViewerMatch.id]);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching score updates:', error));
-                
-                if (!refreshInterval) {
-                    refreshInterval = setInterval(refreshViewerScore, 5000);
-                }
+                document.getElementById('viewer-points-to-win').textContent = 25;
+                startPolling();
             } else {
                 showAlert('No live match currently active', 'info');
                 document.getElementById('viewer-scoreboard').style.display = 'none';
             }
         })
-        .catch(error => console.error('Error fetching live match:', error));
+        .catch(e => console.error('Error fetching live match:', e));
 }
 
-function applyScoreUpdate(matchUpdate) {
-    document.getElementById('viewer-team-a-score').textContent = matchUpdate.teamAScore || 0;
-    document.getElementById('viewer-team-b-score').textContent = matchUpdate.teamBScore || 0;
-    document.getElementById('viewer-team-a-sets-won').textContent = matchUpdate.team_a_sets_won || 0;
-    document.getElementById('viewer-team-b-sets-won').textContent = matchUpdate.team_b_sets_won || 0;
-    document.getElementById('viewer-set-label').textContent = 'SET ' + (matchUpdate.current_set || 1);
-    document.getElementById('viewer-match-status').textContent = matchUpdate.status || 'Ongoing';
+function applyScoreUpdate(u) {
+    document.getElementById('viewer-team-a-score').textContent = u.teamAScore || 0;
+    document.getElementById('viewer-team-b-score').textContent = u.teamBScore || 0;
+    document.getElementById('viewer-team-a-sets-won').textContent = u.team_a_sets_won || 0;
+    document.getElementById('viewer-team-b-sets-won').textContent = u.team_b_sets_won || 0;
+    document.getElementById('viewer-set-label').textContent = 'SET ' + (u.current_set || 1);
+    document.getElementById('viewer-match-status').textContent = u.status || 'Ongoing';
+    document.getElementById('viewer-last-update').textContent = new Date().toLocaleTimeString();
 
-    const teamASection = document.querySelector('.team-a-section');
-    const teamBSection = document.querySelector('.team-b-section');
-    if (matchUpdate.status === 'completed' && matchUpdate.winner_team_id) {
-        if (currentViewerMatch && matchUpdate.winner_team_id == currentViewerMatch.team_a_id) {
-            teamASection.classList.add('winner'); teamBSection.classList.add('loser');
-        } else {
-            teamBSection.classList.add('winner'); teamASection.classList.add('loser');
-        }
+    const aSection = document.querySelector('.team-a-section');
+    const bSection = document.querySelector('.team-b-section');
+    if (u.status === 'completed' && u.winner_team_id) {
+        const aWins = u.winner_team_id == (currentViewerMatch && currentViewerMatch.team_a_id);
+        aSection.classList.toggle('winner', aWins);  aSection.classList.toggle('loser', !aWins);
+        bSection.classList.toggle('winner', !aWins); bSection.classList.toggle('loser', aWins);
     } else {
-        teamASection.classList.remove('winner', 'loser');
-        teamBSection.classList.remove('winner', 'loser');
+        aSection.classList.remove('winner', 'loser');
+        bSection.classList.remove('winner', 'loser');
     }
 }
 
 function refreshViewerScore() {
     if (!currentViewerMatch) return;
-    
-    // Update timestamp
-    const now = new Date();
-    document.getElementById('viewer-last-update').textContent = now.toLocaleTimeString();
-    
-    // Fetch latest scores from the server
-    fetch('/api/score-updates')
-        .then(response => response.json())
-        .then(data => {
-            if (data.updates && data.updates[currentViewerMatch.id]) {
-                applyScoreUpdate(data.updates[currentViewerMatch.id]);
-            }
-        })
-        .catch(error => console.error('Error fetching score updates:', error));
+    // Single-match endpoint — only fetches scores for the one match being watched
+    fetch(`/api/score-updates/${currentViewerMatch.id}`)
+        .then(r => r.json())
+        .then(data => applyScoreUpdate(data))
+        .catch(e => console.error('Error fetching score:', e));
 }
 
-
+function showAlert(message, type) {
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;background:#131a2a;color:white;border-left:4px solid #3b82f6;z-index:9999;border-radius:4px;';
+    d.textContent = message;
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 3000);
+}
 </script>
 {% endblock %}

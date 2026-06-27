@@ -4,6 +4,8 @@ Main Flask application for Volleyball Live Scorer
 from functools import wraps
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash, g
 from flask_sqlalchemy import SQLAlchemy
+from flask_caching import Cache
+from flask_compress import Compress
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os
@@ -21,8 +23,18 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'max_overflow': 3,
     'connect_args': {'connect_timeout': 10},
 }
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 4
+app.config['COMPRESS_MIMETYPES'] = [
+    'text/html', 'text/css', 'application/json',
+    'application/javascript', 'text/javascript'
+]
+app.config['COMPRESS_LEVEL'] = 6
+app.config['COMPRESS_MIN_SIZE'] = 500
 
 db = SQLAlchemy(app)
+cache = Cache(app)
+Compress(app)
 
 with app.app_context():
     db.create_all()
@@ -42,7 +54,7 @@ class Tournament(db.Model):
     __tablename__ = 'tournaments'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False, index=True)
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
     location = db.Column(db.String(255))
@@ -56,7 +68,7 @@ class Team(db.Model):
     __tablename__ = 'teams'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False, index=True)
     coach_name = db.Column(db.String(255))
     jersey_color = db.Column(db.String(100))
     players_count = db.Column(db.Integer, default=12)
@@ -65,11 +77,11 @@ class Team(db.Model):
 class Match(db.Model):
     __tablename__ = 'matches'
     id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False)
-    team_a_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False)
-    team_b_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False, index=True)
+    team_a_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False, index=True)
+    team_b_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False, index=True)
     points_to_win = db.Column(db.Integer, default=25)
-    status = db.Column(db.String(50), default='scheduled')
+    status = db.Column(db.String(50), default='scheduled', index=True)
     winner_team_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     team_a = db.relationship('Team', foreign_keys=[team_a_id])
@@ -80,11 +92,11 @@ class Match(db.Model):
 class Set(db.Model):
     __tablename__ = 'sets'
     id = db.Column(db.Integer, primary_key=True)
-    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=False)
+    match_id = db.Column(db.Integer, db.ForeignKey('matches.id'), nullable=False, index=True)
     set_number = db.Column(db.Integer)
     team_a_score = db.Column(db.Integer, default=0)
     team_b_score = db.Column(db.Integer, default=0)
-    status = db.Column(db.String(50), default='ongoing')
+    status = db.Column(db.String(50), default='ongoing', index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Initialize database
@@ -372,6 +384,7 @@ def score_update():
     return jsonify({'status': 'success', 'set_id': set_id})
 
 @app.route('/api/score-updates', methods=['GET'])
+@cache.cached(timeout=4)
 def get_score_updates():
     """API endpoint for viewers to get current score updates for all matches"""
     matches = Match.query.options(
@@ -406,6 +419,36 @@ def get_score_updates():
         }
 
     return jsonify({'updates': updates})
+
+@app.route('/api/score-updates/<int:match_id>', methods=['GET'])
+@cache.cached(timeout=4, key_prefix=lambda: f'score_update_{request.view_args["match_id"]}')
+def get_match_score_update(match_id):
+    """Fast single-match score endpoint — used by viewer page"""
+    match = Match.query.options(
+        db.joinedload(Match.team_a),
+        db.joinedload(Match.team_b),
+        db.joinedload(Match.tournament)
+    ).get(match_id)
+    if not match:
+        return jsonify({'error': 'Not found'}), 404
+    sets = Set.query.filter_by(match_id=match_id).order_by(Set.set_number).all()
+    active_set = next((s for s in sets if s.status == 'ongoing'), sets[-1] if sets else None)
+    team_a_sets_won = sum(1 for s in sets if s.status == 'completed' and s.team_a_score > s.team_b_score)
+    team_b_sets_won = sum(1 for s in sets if s.status == 'completed' and s.team_b_score > s.team_a_score)
+    return jsonify({
+        'team_a_name': match.team_a.name if match.team_a else 'Team A',
+        'team_b_name': match.team_b.name if match.team_b else 'Team B',
+        'teamAScore': active_set.team_a_score if active_set else 0,
+        'teamBScore': active_set.team_b_score if active_set else 0,
+        'current_set': active_set.set_number if active_set else 1,
+        'status': match.status,
+        'tournament_name': match.tournament.name if match.tournament else '',
+        'winner_team_id': match.winner_team_id,
+        'team_a_id': match.team_a_id,
+        'team_b_id': match.team_b_id,
+        'team_a_sets_won': team_a_sets_won,
+        'team_b_sets_won': team_b_sets_won
+    })
 
 @app.route('/api/tournaments', methods=['GET'])
 @login_required

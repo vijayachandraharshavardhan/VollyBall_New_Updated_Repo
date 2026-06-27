@@ -1,5 +1,7 @@
 flask
 flask-sqlalchemy
+flask-caching
+flask-compress
 werkzeug
 psycopg2-binary
 gunicorn
